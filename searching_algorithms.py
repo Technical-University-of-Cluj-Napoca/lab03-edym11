@@ -184,6 +184,50 @@ def astar(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
             current.make_closed()
     return False
 
+def dls(draw: callable, grid: Grid, start: Spot, end: Spot) -> bool:
+    """
+    Depth-Limited Search (DLS) Algorithm.
+    Args:
+        draw (callable): A function to call to update the Pygame window.
+        grid (Grid): The Grid object containing the spots.
+        start (Spot): The starting spot.
+        end (Spot): The ending spot.
+    Returns:
+        bool: True if a path is found, False otherwise.
+    """
+    if start is None or end is None: 
+        return False
+    
+    stack = [(start, 0)]
+    visited = {start}
+    came_from = {}
+    limit = 30
+    while stack:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+        current, depth = stack.pop()
+        if current == end:
+            while current in came_from:
+                current = came_from[current]
+                current.make_path()
+                grid.draw()
+            end.make_end()
+            return True
+        if depth == limit:
+            continue
+        for neighbor in current.neighbors:
+            if neighbor not in visited and not neighbor.is_barrier():
+                visited.add(neighbor)
+                came_from[neighbor] = current
+                stack.append((neighbor, depth + 1))
+                neighbor.make_open()
+        grid.draw()
+        if current != start:
+            current.make_closed()
+
+    return False
 # and the others algorithms...
 # ▢ Depth-Limited Search (DLS)
 # ▢ Uninformed Cost Search (UCS)
